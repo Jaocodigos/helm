@@ -57,6 +57,11 @@ def create_client(db: Session, data: ClientCreate):
         code_exp=data.code_exp
     )
 
+    if data.user_store:
+
+        user_store = user_stores.get_user_store(db, user_store_name=data.user_store, return_none=False)
+        client.user_store = user_store
+
     for x in data.grant_types:
 
         grant = db.execute(select(GrantType).filter_by(name=x)).scalar_one_or_none()
@@ -90,11 +95,6 @@ def create_client(db: Session, data: ClientCreate):
         )
         db.add(policy)
 
-    if data.user_store:
-
-        user_store = user_stores.get_user_store(db, data.user_store)
-        client.user_store = user_store
-
 
     # Public clients can have a secret, even they don't use?
     secret = client.generate_secret()
@@ -112,7 +112,7 @@ def create_client(db: Session, data: ClientCreate):
         code_exp=client.code_exp,
         client_type=client.client_type,
         response_type=client.response_type,
-        user_store=client.user_store
+        user_store=client.user_store.name if client.user_store else None
     ).model_dump(exclude_none=True)
 
 def erase_client(db: Session, client_id: str):
@@ -188,5 +188,3 @@ def modify_client(db: Session, client_id: str, data: ClientUpdate):
     client.update_record(payload)
 
     client.save(db)
-
-    return UpdatedResponse()

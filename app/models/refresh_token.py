@@ -10,10 +10,12 @@ class RefreshToken(Default, Base):
 
     token_hash: Mapped[str] = mapped_column(String(255), nullable=False)
 
-    user_id: Mapped[str] = mapped_column(
+    sub: Mapped[str] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False
     )
+
+
 
     client_id: Mapped[str] = mapped_column(
         String(100),

@@ -4,7 +4,7 @@ from typing import Annotated
 
 from app.db.session import get_db
 from app.schemas.clients import ClientCreate, ClientUpdate
-from app.schemas.default import DeletedResponse
+from app.schemas.default import DeletedResponse, UpdatedResponse
 from app.services.security.auth import admin_authentication
 from app.services.resources.client import get_all_clients, create_client, erase_client, modify_client
 
@@ -39,8 +39,9 @@ def update_client(
         db: Session = Depends(get_db),
         _: None = Depends(admin_authentication)
 ):
+    modify_client(db=db, client_id=client_id, data=data)
 
-    return modify_client(db=db, client_id=client_id, data=data)
+    return UpdatedResponse
 
 @router.delete("/clients/{client_id}")
 def delete_client(

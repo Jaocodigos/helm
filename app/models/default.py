@@ -1,7 +1,6 @@
 from sqlalchemy.orm import Mapped, mapped_column, Session
 from datetime import datetime
 from uuid_utils import uuid7
-from pydantic import BaseModel
 
 
 class Default:
@@ -20,11 +19,11 @@ class Default:
     )
 
     def update_record(self, data: dict) -> None:
-        for k, v in data:
-            if v is None:
+        for k in data:
+            if data[k] is None:
                 continue
             if hasattr(self, k):
-                setattr(self, k, v)
+                setattr(self, k, data[k])
 
 
     def save(self, session: Session):

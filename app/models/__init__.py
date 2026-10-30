@@ -10,5 +10,6 @@ from app.models.grant_types import GrantType
 from app.models.refresh_token import RefreshToken
 from app.models.password_policy import PasswordPolicy
 from app.models.user_store import UserStore
+from app.models.token import Token
 from app.models.default import Default
 

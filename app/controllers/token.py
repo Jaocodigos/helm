@@ -3,9 +3,9 @@ from sqlalchemy.orm import Session
 from typing import Annotated
 
 from app.db.session import get_db
-from app.services.resources.token import issue_token, validate_and_issue_refresh_token, issue_refresh_token
+from app.services.resources.token import issue_token, validate_and_issue_refresh_token, issue_refresh_token, revoke_token, introspect_token
 from app.services.resources.oauth import validate_code_and_return_user, validate_client
-from app.schemas.token import TokenExchange, TokenResponse
+from app.schemas.token import TokenExchange, TokenResponse, TokenRequest
 
 router = APIRouter(prefix="/api", tags=["Oauth 2.0"])
 
@@ -39,6 +39,7 @@ def token_endpoint(data: Annotated[TokenExchange, Body()],
 
     # Issue token
     token = issue_token(
+        db=db,
         subject=str(user),
         scopes=client.allowed_scopes,
         client_exp=client.token_exp,
@@ -47,6 +48,27 @@ def token_endpoint(data: Annotated[TokenExchange, Body()],
 
     return token
 
-# TODO Add revocation endpoint
 
-# TODO: Add introspection endpoint
+@router.post("/revoke")
+def revoke(
+        data: Annotated[TokenRequest, Body()],
+        db: Session = Depends(get_db),
+        _ = Depends(validate_client)
+    ):
+
+    revoke_token(db, data)
+
+    return {"message": "Token has been revoked."}, 200
+
+
+@router.post("/introspect")
+def introspect(
+        data: Annotated[TokenRequest, Body()],
+        db: Session = Depends(get_db),
+        _ = Depends(validate_client)
+):
+
+    token = introspect_token(db, data)
+
+    return token
+
